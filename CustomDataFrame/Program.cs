@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -484,7 +484,7 @@ public class Program
             // Use command line argument or default file
             string excelFilePath = args.Length > 0 ? args[0] : "test.xlsx";
             
-            Console.WriteLine("Advanced Excel Reader with DataFrame");
+            Console.WriteLine("Custom DataFrame Implementation");
             Console.WriteLine($"Reading Excel file: {excelFilePath}");
             Console.WriteLine(new string('=', 60));
 
@@ -560,30 +560,27 @@ public class Program
                 }
 
                 // Export examples - demonstrate all formats
-                var excelPath = Path.ChangeExtension(excelFilePath, ".enhanced.xlsx");
-                var csvPath = Path.ChangeExtension(excelFilePath, ".enhanced.csv");
-                var pdfPath = Path.ChangeExtension(excelFilePath, ".enhanced.pdf");
+                var excelPath = Path.ChangeExtension(excelFilePath, ".custom.xlsx");
+                var csvPath = Path.ChangeExtension(excelFilePath, ".custom.csv");
+                var pdfPath = Path.ChangeExtension(excelFilePath, ".custom.pdf");
                 
-                dataFrame.ToExcel(excelPath, "Enhanced Data");
-                Console.WriteLine($"\nExported enhanced DataFrame to Excel: {excelPath}");
+                dataFrame.ToExcel(excelPath, "Custom DataFrame Data");
+                Console.WriteLine($"\nExported custom DataFrame to Excel: {excelPath}");
                 
                 dataFrame.ToCsv(csvPath);
-                Console.WriteLine($"Exported enhanced DataFrame to CSV: {csvPath}");
+                Console.WriteLine($"Exported custom DataFrame to CSV: {csvPath}");
                 
-                dataFrame.ToPdf(pdfPath, "Enhanced Sales Report");
-                Console.WriteLine($"Exported enhanced DataFrame to PDF: {pdfPath}");
+                dataFrame.ToPdf(pdfPath, "Custom DataFrame Report");
+                Console.WriteLine($"Exported custom DataFrame to PDF: {pdfPath}");
 
-                Console.WriteLine("\nAll advanced features demonstrated successfully!");
+                Console.WriteLine("\nCustom DataFrame implementation completed successfully!");
             }
-
-            // Test Microsoft.Data.Analysis library with the same data
-            MicrosoftDataAnalysisTest.TestMicrosoftDataAnalysis(args);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
             Console.WriteLine("\nUsage: dotnet run [excel-file-path]");
-            Console.WriteLine("Example: dotnet run myfile.xlsx");
+            Console.WriteLine("Example: dotnet run ../myfile.xlsx");
             Environment.Exit(1);
         }
     }
