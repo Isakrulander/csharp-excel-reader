@@ -38,7 +38,7 @@ public class DataFrame
     {
         if (Headers.Count == 0)
         {
-            Console.WriteLine("DataFrame är tom.");
+            Console.WriteLine("DataFrame is empty.");
             return;
         }
 
@@ -54,7 +54,7 @@ public class DataFrame
             Console.WriteLine(string.Join("\t", values));
         }
 
-        Console.WriteLine($"\nShape: {Rows.Count} rader × {Headers.Count} kolumner");
+        Console.WriteLine($"\nShape: {Rows.Count} rows × {Headers.Count} columns");
     }
 }
 
@@ -80,7 +80,7 @@ public class ExcelReader
 
                 if (worksheet.Dimension == null)
                 {
-                    Console.WriteLine("Arbetsbladet är tomt.");
+                    Console.WriteLine("The worksheet is empty.");
                     return dataFrame;
                 }
 
@@ -110,7 +110,7 @@ public class ExcelReader
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ett fel uppstod: {ex.Message}");
+            Console.WriteLine($"An error occurred: {ex.Message}");
         }
 
         return dataFrame;
@@ -121,36 +121,36 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // Ange filnamnet för din Excel-fil här
+        // Specify the filename for your Excel file here
         string excelFilePath = "test.xlsx";
 
-        // Skapa en instans av din klass
+        // Create an instance of the ExcelReader class
         var reader = new ExcelReader();
 
-        // Läs in datan som en DataFrame
+        // Read the data as a DataFrame
         var dataFrame = reader.ReadDataFrame(excelFilePath);
 
-        // Visa DataFrame (pandas-liknande format)
-        Console.WriteLine("Excel data som DataFrame:");
+        // Display DataFrame (pandas-like format)
+        Console.WriteLine("Excel data as DataFrame:");
         Console.WriteLine("=" + new string('=', 40));
         dataFrame.Display();
 
-        // Exempel på DataFrame-funktioner
+        // Example DataFrame functions
         if (dataFrame.Headers.Count > 0)
         {
-            Console.WriteLine("\n--- DataFrame funktioner ---");
-            Console.WriteLine($"Kolumnnamn: [{string.Join(", ", dataFrame.Headers)}]");
+            Console.WriteLine("\n--- DataFrame functions ---");
+            Console.WriteLine($"Column names: [{string.Join(", ", dataFrame.Headers)}]");
             
-            // Visa första kolumnens värden
+            // Show first column values
             var firstColumn = dataFrame.Headers[0];
             var columnValues = dataFrame.GetColumn(firstColumn);
-            Console.WriteLine($"\nVärden i kolumn '{firstColumn}': [{string.Join(", ", columnValues)}]");
+            Console.WriteLine($"\nValues in column '{firstColumn}': [{string.Join(", ", columnValues)}]");
             
-            // Visa specifik cell
+            // Show specific cell
             if (dataFrame.Rows.Count > 0)
             {
                 var firstCellValue = dataFrame.GetValue(0, firstColumn);
-                Console.WriteLine($"Första värdet i '{firstColumn}': {firstCellValue}");
+                Console.WriteLine($"First value in '{firstColumn}': {firstCellValue}");
             }
         }
     }
