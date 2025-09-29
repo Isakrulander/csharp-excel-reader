@@ -575,6 +575,9 @@ public class Program
 
                 Console.WriteLine("\nAll advanced features demonstrated successfully!");
             }
+
+            // Test Microsoft.Data.Analysis library with the same data
+            MicrosoftDataAnalysisTest.TestMicrosoftDataAnalysis(args);
         }
         catch (Exception ex)
         {

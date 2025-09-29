@@ -1,0 +1,88 @@
+using Microsoft.Data.Analysis;
+using System;
+using System.IO;
+
+public class MicrosoftDataAnalysisExample
+{
+    public static void RunExample(string[] args)
+    {
+        try
+        {
+            Console.WriteLine("\n" + new string('=', 60));
+            Console.WriteLine("COMPARISON: Microsoft.Data.Analysis DataFrame");
+            Console.WriteLine("Using CSV file (converted from Excel by our custom implementation)");
+            Console.WriteLine(new string('=', 60));
+
+            // Use the CSV file that was created by our custom implementation
+            string csvFilePath = "test.enhanced.csv";
+            
+            if (!File.Exists(csvFilePath))
+            {
+                Console.WriteLine($"CSV file '{csvFilePath}' not found. Cannot run Microsoft.Data.Analysis comparison.");
+                return;
+            }
+
+            // Load DataFrame from CSV using Microsoft.Data.Analysis
+            var df = DataFrame.LoadCsv(csvFilePath);
+
+            // Display basic info - this should work with the official API
+            Console.WriteLine($"Shape: {df.Rows.Count} rows × {df.Columns.Count} columns");
+            Console.WriteLine($"Columns: [{string.Join(", ", df.Columns.Select(c => c.Name))}]");
+
+            // Display data (built-in)
+            Console.WriteLine("\nDataFrame:");
+            Console.WriteLine(df);
+
+            // Get description/statistics (built-in)
+            Console.WriteLine("\nDescription/Statistics:");
+            var description = df.Description();
+            Console.WriteLine(description);
+
+            // Try filtering if we have numeric columns
+            var numericColumn = df.Columns.FirstOrDefault(c => c.DataType == typeof(double) || c.DataType == typeof(int));
+            if (numericColumn != null)
+            {
+                Console.WriteLine($"\nTrying filter on column '{numericColumn.Name}'...");
+                
+                // This is the pandas-style API that should work
+                if (numericColumn.DataType == typeof(double))
+                {
+                    var doubleColumn = (PrimitiveDataFrameColumn<double>)numericColumn;
+                    var mean = doubleColumn.Mean();
+                    var filter = doubleColumn.ElementwiseGreaterThan(mean);
+                    var filtered = df.Filter(filter);
+                    
+                    Console.WriteLine($"Filtered ({numericColumn.Name} > {mean:F2}):");
+                    Console.WriteLine(filtered);
+                }
+            }
+
+            // Export to CSV
+            DataFrame.SaveCsv(df, "microsoft_roundtrip.csv");
+            Console.WriteLine("\nExported Microsoft DataFrame back to CSV: microsoft_roundtrip.csv");
+
+            Console.WriteLine("\nMicrosoft.Data.Analysis demonstration completed!");
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Microsoft.Data.Analysis Error: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+            
+            // Try a simple example to see if the library works at all
+            Console.WriteLine("\nTrying simple Microsoft.Data.Analysis example:");
+            try
+            {
+                var simpleData = new int[] { 1, 2, 3, 4, 5 };
+                var column = new PrimitiveDataFrameColumn<int>("Numbers", simpleData);
+                var simpleDf = new DataFrame(column);
+                Console.WriteLine("Simple DataFrame created successfully:");
+                Console.WriteLine(simpleDf);
+            }
+            catch (Exception simpleEx)
+            {
+                Console.WriteLine($"Even simple example failed: {simpleEx.Message}");
+            }
+        }
+    }
+}
