@@ -1,0 +1,35 @@
+# C# Excel Reader with DataFrame - Dependencies
+# This file lists all NuGet packages required for the project
+
+# Core Excel Processing Library
+EPPlus==8.2.0
+# Purpose: Excel file reading/writing (.xlsx, .xlsm)
+# License: Polyform Noncommercial 1.0.0 (Commercial license available)
+# Features: Workbook/worksheet manipulation, cell formatting, charts
+
+# PDF Generation Library
+iTextSharp.LGPLv2.Core==3.7.7
+# Purpose: PDF document creation and manipulation
+# License: LGPL v2 (Open Source)
+# Features: Table generation, text formatting, document layout
+# Dependencies: BouncyCastle.Cryptography (2.6.2), SkiaSharp (3.119.0)
+
+# Configuration Management
+System.Configuration.ConfigurationManager==9.0.9
+# Purpose: Application configuration file handling
+# License: MIT (Microsoft)
+# Features: app.config reading, connection strings, app settings
+
+# .NET Framework Target
+# Microsoft.NET.Sdk - .NET 8.0
+# Built-in libraries used:
+# - System.IO (File operations)
+# - System.Text (Text encoding, StringBuilder)
+# - System.Linq (LINQ operations)
+# - System.Collections.Generic (Collections)
+# - System.Globalization (Number/date formatting)
+
+# Installation Commands:
+# dotnet add package EPPlus --version 8.2.0
+# dotnet add package iTextSharp.LGPLv2.Core --version 3.7.7
+# dotnet add package System.Configuration.ConfigurationManager --version 9.0.9

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 
 // Simple DataFrame-like class for C#
 public class DataFrame
@@ -138,6 +140,110 @@ public class DataFrame
         // Save file
         var file = new FileInfo(filePath);
         package.SaveAs(file);
+    }
+
+    /// <summary>
+    /// Exports DataFrame to CSV file
+    /// </summary>
+    public void ToCsv(string filePath, string delimiter = ",")
+    {
+        using var writer = new StreamWriter(filePath, false, Encoding.UTF8);
+        
+        // Write headers
+        writer.WriteLine(string.Join(delimiter, Headers.Select(h => EscapeCsvField(h, delimiter))));
+        
+        // Write data rows
+        foreach (var row in Rows)
+        {
+            var values = Headers.Select(header =>
+            {
+                var value = row.ContainsKey(header) ? row[header]?.ToString() ?? "" : "";
+                return EscapeCsvField(value, delimiter);
+            });
+            writer.WriteLine(string.Join(delimiter, values));
+        }
+    }
+
+    /// <summary>
+    /// Exports DataFrame to PDF file
+    /// </summary>
+    public void ToPdf(string filePath, string title = "DataFrame Report")
+    {
+        using var stream = new FileStream(filePath, FileMode.Create);
+        var document = new Document(PageSize.A4.Rotate(), 10f, 10f, 10f, 10f);
+        var writer = PdfWriter.GetInstance(document, stream);
+        
+        document.Open();
+        
+        // Add title
+        var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
+        var titleParagraph = new Paragraph(title, titleFont)
+        {
+            Alignment = Element.ALIGN_CENTER,
+            SpacingAfter = 20f
+        };
+        document.Add(titleParagraph);
+        
+        // Create table
+        var table = new PdfPTable(Headers.Count)
+        {
+            WidthPercentage = 100
+        };
+        
+        // Add headers
+        var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
+        foreach (var header in Headers)
+        {
+            var cell = new PdfPCell(new Phrase(header, headerFont))
+            {
+                BackgroundColor = new BaseColor(230, 230, 230),
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                Padding = 5f
+            };
+            table.AddCell(cell);
+        }
+        
+        // Add data rows
+        var dataFont = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+        foreach (var row in Rows)
+        {
+            foreach (var header in Headers)
+            {
+                var value = row.ContainsKey(header) ? row[header]?.ToString() ?? "" : "";
+                var cell = new PdfPCell(new Phrase(value, dataFont))
+                {
+                    Padding = 3f,
+                    HorizontalAlignment = (row.ContainsKey(header) && IsNumeric(row[header])) ? 
+                                          Element.ALIGN_RIGHT : Element.ALIGN_LEFT
+                };
+                table.AddCell(cell);
+            }
+        }
+        
+        document.Add(table);
+        
+        // Add footer with metadata
+        var footerFont = FontFactory.GetFont(FontFactory.HELVETICA, 8);
+        var footer = new Paragraph($"\nGenerated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss} | Rows: {RowCount} | Columns: {ColumnCount}", footerFont)
+        {
+            Alignment = Element.ALIGN_CENTER,
+            SpacingBefore = 20f
+        };
+        document.Add(footer);
+        
+        document.Close();
+    }
+
+    /// <summary>
+    /// Helper method to escape CSV fields that contain delimiters, quotes, or newlines
+    /// </summary>
+    private static string EscapeCsvField(string field, string delimiter)
+    {
+        if (field.Contains(delimiter) || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+        {
+            return "\"" + field.Replace("\"", "\"\"") + "\"";
+        }
+        return field;
     }
 
     /// <summary>
@@ -453,10 +559,19 @@ public class Program
                     Console.WriteLine($"\nFiltering: Cannot filter non-numeric column '{firstColumn}'");
                 }
 
-                // Export example
-                var exportPath = Path.ChangeExtension(excelFilePath, ".enhanced.xlsx");
-                dataFrame.ToExcel(exportPath, "Enhanced Data");
-                Console.WriteLine($"\nExported enhanced DataFrame to: {exportPath}");
+                // Export examples - demonstrate all formats
+                var excelPath = Path.ChangeExtension(excelFilePath, ".enhanced.xlsx");
+                var csvPath = Path.ChangeExtension(excelFilePath, ".enhanced.csv");
+                var pdfPath = Path.ChangeExtension(excelFilePath, ".enhanced.pdf");
+                
+                dataFrame.ToExcel(excelPath, "Enhanced Data");
+                Console.WriteLine($"\nExported enhanced DataFrame to Excel: {excelPath}");
+                
+                dataFrame.ToCsv(csvPath);
+                Console.WriteLine($"Exported enhanced DataFrame to CSV: {csvPath}");
+                
+                dataFrame.ToPdf(pdfPath, "Enhanced Sales Report");
+                Console.WriteLine($"Exported enhanced DataFrame to PDF: {pdfPath}");
 
                 Console.WriteLine("\nAll advanced features demonstrated successfully!");
             }

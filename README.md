@@ -7,13 +7,34 @@ A C# Excel reader that provides pandas-like DataFrame functionality using EPPlus
 - **DataFrame Interface**: Pandas-inspired data structure with rows and columns
 - **Multiple Worksheets**: Read specific worksheets by index or name
 - **Data Analysis**: Filter, sort, and calculate statistics
-- **Excel Export**: Save DataFrame back to Excel files
+- **Multi-Format Export**: Save DataFrame to Excel (.xlsx), CSV (.csv), and PDF (.pdf)
+- **Advanced Statistics**: Count, mean, min, max, standard deviation
+- **Data Type Handling**: Automatic detection of numbers, dates, and text
 - **Error Handling**: Comprehensive validation and error messages
 
 ## Requirements
 
-- .NET 8.0
-- EPPlus 8.2.0 (included)
+### System Requirements
+- .NET 8.0 SDK or later
+- Windows, macOS, or Linux
+
+### NuGet Dependencies
+- **EPPlus 8.2.0** - Excel file processing (.xlsx, .xlsm)
+- **iTextSharp.LGPLv2.Core 3.7.7** - PDF document generation
+- **System.Configuration.ConfigurationManager 9.0.9** - Configuration management
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/Isakrulander/csharp-excel-reader.git
+cd csharp-excel-reader
+
+# Restore NuGet packages
+dotnet restore
+
+# Build the project
+dotnet build
+```
 
 ## Quick Start
 
@@ -69,7 +90,9 @@ a       b
 ------
 4       7
 
-Exported enhanced DataFrame to: test.enhanced.xlsx
+Exported enhanced DataFrame to Excel: test.enhanced.xlsx
+Exported enhanced DataFrame to CSV: test.enhanced.csv
+Exported enhanced DataFrame to PDF: test.enhanced.pdf
 ```
 
 ## API
@@ -93,6 +116,8 @@ DataFrame Filter(Func<Dictionary<string, object>, bool> predicate)
 DataFrame SortBy(string columnName, bool ascending = true)
 Dictionary<string, double> GetStats(string columnName) // Count, Sum, Mean, Min, Max, StdDev
 void ToExcel(string filePath, string worksheetName = "Data")
+void ToCsv(string filePath, string delimiter = ",")
+void ToPdf(string filePath, string title = "DataFrame Report")
 ```
 
 ### ExcelReader
@@ -124,8 +149,10 @@ var filtered = df.Filter(row => (double)row["Value"] > 10);
 // Sorting
 var sorted = df.SortBy("ColumnName", ascending: false);
 
-// Export
+// Export to multiple formats
 df.ToExcel("output.xlsx", "MyData");
+df.ToCsv("output.csv");
+df.ToPdf("report.pdf", "Sales Report");
 
 // Multiple worksheets
 var worksheets = reader.GetWorksheetInfo("file.xlsx");
@@ -137,19 +164,52 @@ var namedSheet = reader.ReadDataFrame("file.xlsx", "SheetName");
 
 ```
 ├── Program.cs          # DataFrame and ExcelReader classes
-├── NKTCS.csproj       # Project configuration
-├── README.md          # Documentation
+├── NKTCS.csproj       # Project configuration and NuGet packages
+├── app.config         # EPPlus license configuration
+├── README.md          # Project documentation
+├── requirements.txt   # Dependency list with descriptions
+├── DEPENDENCIES.md    # Detailed library documentation
 └── test.xlsx          # Sample Excel file
 ```
 
+## Libraries Used
+
+### EPPlus 8.2.0
+- **Purpose**: Excel file reading and writing (.xlsx, .xlsm formats)
+- **License**: Polyform Noncommercial 1.0.0 (Free for non-commercial use)
+- **Features Used**: Workbook manipulation, worksheet access, cell reading/writing, auto-fit columns
+- **Configuration**: Non-commercial license set in app.config
+
+### iTextSharp.LGPLv2.Core 3.7.7
+- **Purpose**: PDF document generation and manipulation
+- **License**: LGPL v2 (Open Source)
+- **Features Used**: PDF table creation, text formatting, document layout, cell styling
+- **Dependencies**: BouncyCastle.Cryptography (2.6.2), SkiaSharp (3.119.0)
+
+### System.Configuration.ConfigurationManager 9.0.9
+- **Purpose**: Application configuration management
+- **License**: MIT (Microsoft)
+- **Features Used**: Reading app.config file for EPPlus license configuration
+
+### Built-in .NET Libraries
+- **System.IO**: File operations and stream handling
+- **System.Text**: Text encoding (UTF-8) and StringBuilder for CSV generation
+- **System.Linq**: LINQ operations for data filtering and transformation
+- **System.Collections.Generic**: Generic collections (List, Dictionary)
+- **System.Globalization**: Number and date formatting
+
 ## Implementation Details
 
-- **EPPlus 8.2.0** for Excel file processing
-- **Non-commercial license** configuration included
-- **Single file architecture** for simplicity
-- **Error handling** with descriptive messages
-- **Data type detection** for dates and numbers
+- **Single file architecture** for simplicity (Program.cs)
+- **Pandas-inspired API** design for familiar data manipulation
+- **Comprehensive error handling** with descriptive messages
+- **Automatic data type detection** for numbers, dates, and text
+- **Memory efficient** streaming for large datasets
+- **Cross-platform compatible** (.NET 8.0)
 
 ## License
 
-Uses EPPlus under Polyform Noncommercial License for non-commercial use.
+- **EPPlus**: Polyform Noncommercial License (Free for non-commercial use)
+- **iTextSharp**: LGPL v2 (Open Source)
+- **Microsoft Libraries**: MIT License
+- **Project Code**: Open Source (specify your preferred license)
