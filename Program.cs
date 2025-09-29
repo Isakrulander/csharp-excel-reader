@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-// Simple DataFrame-like class for C#
+/// <summary>
+/// A simple DataFrame-like class for C# that mimics pandas DataFrame functionality
+/// </summary>
 public class DataFrame
 {
     public List<string> Headers { get; set; }
@@ -17,8 +19,15 @@ public class DataFrame
         Rows = new List<Dictionary<string, object>>();
     }
 
+    /// <summary>
+    /// Adds a new row to the DataFrame
+    /// </summary>
+    /// <param name="row">Dictionary containing column names and values</param>
     public void AddRow(Dictionary<string, object> row)
     {
+        if (row == null)
+            throw new ArgumentNullException(nameof(row), "Row cannot be null");
+        
         Rows.Add(row);
     }
 
@@ -34,6 +43,9 @@ public class DataFrame
         return Rows.Select(row => row.ContainsKey(columnName) ? row[columnName] : null).ToList();
     }
 
+    /// <summary>
+    /// Displays the DataFrame in a formatted table
+    /// </summary>
     public void Display()
     {
         if (Headers.Count == 0)
@@ -58,6 +70,9 @@ public class DataFrame
     }
 }
 
+/// <summary>
+/// Service for reading Excel files and converting them to DataFrame objects
+/// </summary>
 public class ExcelReader
 {
     static ExcelReader()
@@ -66,8 +81,20 @@ public class ExcelReader
         ExcelPackage.License.SetNonCommercialPersonal("Personal Use");
     }
 
+    /// <summary>
+    /// Reads an Excel file and returns the data as a DataFrame
+    /// </summary>
+    /// <param name="filePath">Path to the Excel file</param>
+    /// <returns>DataFrame containing the Excel data</returns>
     public DataFrame ReadDataFrame(string filePath)
     {
+        // Validate input
+        if (string.IsNullOrEmpty(filePath))
+            throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
+
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException($"Excel file not found: {filePath}");
+
         var dataFrame = new DataFrame();
 
         try
@@ -121,8 +148,12 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // Specify the filename for your Excel file here
-        string excelFilePath = "test.xlsx";
+        try
+        {
+            // Use command line argument or default file
+            string excelFilePath = args.Length > 0 ? args[0] : "test.xlsx";
+            
+            Console.WriteLine($"Reading Excel file: {excelFilePath}");
 
         // Create an instance of the ExcelReader class
         var reader = new ExcelReader();
@@ -152,6 +183,14 @@ public class Program
                 var firstCellValue = dataFrame.GetValue(0, firstColumn);
                 Console.WriteLine($"First value in '{firstColumn}': {firstCellValue}");
             }
+        }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine("\nUsage: dotnet run [excel-file-path]");
+            Console.WriteLine("Example: dotnet run myfile.xlsx");
+            Environment.Exit(1);
         }
     }
 }
