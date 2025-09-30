@@ -33,6 +33,13 @@
           <div><strong>Columns:</strong> {{ result.columnCount }}</div>
         </div>
 
+        <div class="export-buttons">
+          <h4>Export Options</h4>
+          <button @click="exportFile('csv')" class="export-btn csv-btn">📊 Export to CSV</button>
+          <button @click="exportFile('excel')" class="export-btn excel-btn">📈 Export to Excel</button>
+          <button @click="exportFile('pdf')" class="export-btn pdf-btn">📄 Export to PDF</button>
+        </div>
+
         <div v-if="result.data && result.data.length > 0" class="data-table">
           <h4>Data Preview (First 10 rows)</h4>
           <table class="simple-table">
@@ -64,6 +71,7 @@ export default {
     const progress = ref(0)
     const result = ref(null)
     const fileInput = ref(null)
+    const uploadedFile = ref(null)
 
     const triggerFileInput = () => {
       fileInput.value.click()
@@ -122,6 +130,7 @@ export default {
         progress.value = 100
         loading.value = false
         result.value = response.data
+        uploadedFile.value = file
         alert('Excel file processed successfully!')
       } catch (error) {
         clearInterval(progressTimer)
@@ -136,14 +145,56 @@ export default {
       }
     }
 
+    const exportFile = async (format) => {
+      if (!uploadedFile.value) {
+        alert('No file to export. Please upload a file first.')
+        return
+      }
+
+      try {
+        loading.value = true
+        const formData = new FormData()
+        formData.append('file', uploadedFile.value)
+
+        const response = await axios.post(`http://localhost:5000/api/excel/export/${format}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          responseType: 'blob'
+        })
+
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        
+        const fileExtension = format === 'excel' ? 'xlsx' : format
+        const fileName = uploadedFile.value.name.replace(/\.[^/.]+$/, '') + `_exported.${fileExtension}`
+        link.setAttribute('download', fileName)
+        
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        loading.value = false
+        alert(`File exported as ${format.toUpperCase()} successfully!`)
+      } catch (error) {
+        loading.value = false
+        alert(`Export failed: ${error.response?.data?.error || error.message}`)
+      }
+    }
+
     return {
       loading,
       progress,
       result,
       fileInput,
+      uploadedFile,
       triggerFileInput,
       handleFileSelect,
-      handleDrop
+      handleDrop,
+      exportFile
     }
   }
 }
@@ -288,5 +339,61 @@ export default {
 
 .simple-table tr:hover {
   background: #f5f7fa;
+}
+
+.export-buttons {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.export-buttons h4 {
+  margin-bottom: 15px;
+  color: #303133;
+  font-size: 1.2rem;
+}
+
+.export-btn {
+  display: inline-block;
+  margin: 0 10px 10px 0;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.csv-btn {
+  background: #28a745;
+  color: white;
+}
+
+.csv-btn:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.excel-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.excel-btn:hover {
+  background: #138496;
+  transform: translateY(-2px);
+}
+
+.pdf-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.pdf-btn:hover {
+  background: #c82333;
+  transform: translateY(-2px);
 }
 </style>
